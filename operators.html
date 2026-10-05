@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Operators Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1> Central Hub Operators Portal </h1>
+    <button onclick="window.location.href = 'index.html'">
+        Home
+    </button>
+    <main>
+        <section>
+            <h2>Package tracker</h2>
+            <h5>Input all required information into the form and submit for log tracking </h5>
+            <form action="/submit" method="post">
+                <h4>Receipt Information</h4>
+                <label for="tracknum"> Tracking Number</label>
+                <input type="text" id="tracknum" name="tracknum" required>
+                <br>
+                <h4>Package Information</h4>
+                <label for="weight"> Weight </label>
+                <input type="number" id="weight" name="weight" required>
+                lbs.
+                <br>
+                <label for="length"> Length </label>
+                <input type="number" id="length" name="length" required>
+                in.
+                <br>
+                <label for="width"> Width </label>
+                <input type="number" id="width" name="width" required>
+                in.
+                <br>
+                <label for="height"> Height </label>
+                <input type="number" id="height" name="height" required>
+                in.
+
+                <h4>Destination Information</h4>
+                <label for="building">Building Information</label>
+                <select id="building" name="building" required>
+                    <option value="">Select Building</option>
+                    <option value="CSU">CSU</option>
+                    <option value="Armstrong Hall">Armstrong Hall</option>
+                    <option value="Memorial Library">Memorial Library</option>
+                    <option value="Wissink Hall">Wissink Hall</option>
+                </select>
+                <br>
+                <label for="locker">Locker Information</label>
+                <select id="locker" name="locker" required>
+                    <option value="">Select Locker</option>
+                    <option value="100">L100</option>
+                    <option value="105">L105</option>
+                    <option value="110">L110</option>
+                    <option value="115">L115</option>
+                </select>
+                <br>
+                <h4>Package Priority</h4>
+                <input type="radio" id="low" name="priority" value="low" checked>
+
+                <label for="low">Low</label>
+
+                <input type="radio" id="medium" name="priority" value="medium">
+
+                <label for="medium">Medium</label>
+
+                <input type="radio" id="high" name="priority" value="high">
+
+                <label for="high">High</label>
+
+                <input type="radio" id="urgent" name="priority" value="urgent">
+
+                <label for="urgent">Urgent</label>
+                <h5> Low - Same week priority
+                    <br>
+                    Medium - 1-3 Days priority
+                    <br>
+                    High - Same day priority
+                    <br>
+                    Urgent - Before noon priority
+                </h5>
+                <button type="submit">Submit Package Details</button>
+
+            </form>
+        </section>
+        <section>
+            <h2> Tracking table</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tracking Number</th>
+                        <th>Priority</th>
+                        <th>Building Information</th>
+                        <th>Locker Information</th>
+                        <th>Weight</th>
+                        <th>Length</th>
+                        <th>Width</th>
+                        <th>Height</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PKG1001</td>
+                        <td>High</td>
+                        <td>CSU</td>
+                        <td>L105</td>
+                        <td>27 lbs</td>
+                        <td>12 in.</td>
+                        <td>10 in.</td>
+                        <td>8 in.</td>
+                    </tr>
+                    <tr>
+                        <td>PKG1012</td>
+                        <td>Low</td>
+                        <td>Memorial Library</td>
+                        <td>L110</td>
+                        <td>21 lbs</td>
+                        <td>15 in.</td>
+                        <td>12 in.</td>
+                        <td>9 in.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 MNSU-CampusEco. All rights reserved.</p>
+    </footer>
+</body>
+
+
+
+</html>
