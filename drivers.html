@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Drivers Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body> 
+    <h1> Drivers Portal </h1>
+    <button onclick="window.location.href = 'index.html'">
+      Home
+    </button>
+    <main> 
+        <h2>Delivery Status & Log Update</h2>
+        <h5>Must be logged in to view available orders, claim deliveries, and update transit milestones </h5>
+        <form action = "/submit" method ="post">
+            <h4>Vehicle Information</h4>
+            <p><strong>Driver ID: eCart-11</strong></p>
+            <input type="hidden" id="cartid" name="cartid" value="eCart-11">
+            <button type="button" id="reportBattery">Report Low Battery</button>
+            <br>
+
+            <h4>Available Orders Queue</h4>
+            <label for="availableOrders">Select Available Delivery</label>
+            <select id="availableOrders" name="availableOrders">
+                <option value="">Select an order to claim</option>
+            </select>
+            <br>
+            <button type="button" id="claimOrder">Claim Delivery</button>
+            <br>
+
+            <h4>My Delivery Schedule</h4>
+            <label for="claimedOrders">Active Deliveries</label>
+            <select id="claimedOrders" name="claimedOrders">
+                <option value="">Select claimed package</option>
+            </select>
+            <br>
+            <label for="status">Transit Milestone</label>
+            <select id="status" name="status">
+                <option value="">Select Status</option>
+                <option value="LOADED">Loaded</option>
+                <option value="EN_ROUTE">En Route</option>
+                <option value="DELIVERED">Delivered</option>
+            </select>
+            <br>
+            <input type="submit" value="Update Delivery Schedule">
+        </form>
+    </main>
+</body>
+
+<footer>
+    <p>&copy; 2026 MNSU-CampusEco. All rights reserved.</p>
+</footer>
+
+</html>
