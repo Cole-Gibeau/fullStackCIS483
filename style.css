@@ -1,0 +1,78 @@
+/* Basic page background and fonts */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3eef8;
+  color: #333333;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* This is for group wide headings across our HTML docs */
+h1,
+h2,
+h3,
+h4 {
+  color: #603080;
+}
+
+/* Main content area */
+main {
+  background-color: white;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #d5c5e3;
+}
+
+/* Space between sections */
+section {
+  margin-bottom: 30px;
+}
+
+/* Text fields and dropdowns */
+input[type="text"],
+input[type="number"],
+select {
+  padding: 8px;
+  margin: 5px;
+  border: 1px solid #aaaaaa;
+}
+
+/* Buttons Styling */
+button,
+input[type="submit"] {
+  background-color: #603080;
+  color: white;
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+/* CSS for all table aspects, header, data */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #cccccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #e8dcf2;
+}
+
+/* Links */
+a {
+  color: #603080;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  margin-top: 20px;
+}
