@@ -48,3 +48,31 @@ input[type="submit"] {
   border: none;
   cursor: pointer;
 }
+
+/* CSS for all table aspects, header, data */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #cccccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #e8dcf2;
+}
+
+/* Links */
+a {
+  color: #603080;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  margin-top: 20px;
+}
