@@ -10,9 +10,7 @@
   <body>
     <header>
       <h1>End Users Portal</h1>
-      <nav aria-label="Main">
-        <a href="index.html">Home</a>
-      </nav>
+      <button onclick="window.location.href = 'index.html'">Home</button>
     </header>
 
     <main>
@@ -65,7 +63,13 @@
         <h2>Sign for a delivery</h2>
         <form action="#" method="post">
           <label for="signpkg">Tracking number</label>
-          <input type="text" id="signpkg" name="signpkg" pattern="PKG[0-9]{4}" required />
+          <input
+            type="text"
+            id="signpkg"
+            name="signpkg"
+            pattern="PKG[0-9]{4}"
+            required
+          />
           <br />
           <label for="signname">Full name</label>
           <input type="text" id="signname" name="signname" required />
@@ -95,14 +99,23 @@
           <input type="radio" id="locker" name="location" value="locker" />
           <label for="locker">Locker</label>
           <h3>Notify me when</h3>
-          <input type="checkbox" id="notifyTransit" name="notify" value="transit" />
+          <input
+            type="checkbox"
+            id="notifyTransit"
+            name="notify"
+            value="transit"
+          />
           <label for="notifyTransit">Package is en route</label>
-          <input type="checkbox" id="notifyDelivered" name="notify" value="delivered" />
+          <input
+            type="checkbox"
+            id="notifyDelivered"
+            name="notify"
+            value="delivered"
+          />
           <label for="notifyDelivered">Package is delivered</label>
           <br />
           <button type="submit">Save Preferences</button>
         </form>
-
       </section>
 
       <section id="impact">
