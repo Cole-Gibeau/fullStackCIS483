@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>End Users | MNSU-CampusEco</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>End Users Portal</h1>
+      <nav aria-label="Main">
+        <a href="index.html">Home</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="track">
+        <h2>Track a package</h2>
+        <form action="#" method="get">
+          <label for="tracknum">Tracking number</label>
+          <input
+            type="text"
+            id="tracknum"
+            name="tracknum"
+            pattern="PKG[0-9]{4}"
+            placeholder="PKG1001"
+            title="PKG followed by 4 digits"
+            required
+          />
+          <button type="submit">Track</button>
+        </form>
+      </section>
+
+      <section id="packages">
+        <h2>My packages</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tracking Number</th>
+              <th>Building</th>
+              <th>Locker</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PKG1001</td>
+              <td>CSU</td>
+              <td>L105</td>
+              <td>En Route</td>
+            </tr>
+            <tr>
+              <td>PKG1012</td>
+              <td>Memorial Library</td>
+              <td>L110</td>
+              <td>Loaded</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="signoff">
+        <h2>Sign for a delivery</h2>
+        <form action="#" method="post">
+          <label for="signpkg">Tracking number</label>
+          <input type="text" id="signpkg" name="signpkg" pattern="PKG[0-9]{4}" required />
+          <br />
+          <label for="signname">Full name</label>
+          <input type="text" id="signname" name="signname" required />
+          <br />
+          <input type="checkbox" id="received" name="received" required />
+          <label for="received">I received this package</label>
+          <br />
+          <button type="submit">Confirm Delivery</button>
+        </form>
+      </section>
+
+      <section id="preferences">
+        <h2>Delivery preferences</h2>
+        <form action="#" method="post">
+          <label for="building">Building</label>
+          <select id="building" name="building" required>
+            <option value="">Select Building</option>
+            <option value="CSU">CSU</option>
+            <option value="Armstrong Hall">Armstrong Hall</option>
+            <option value="Memorial Library">Memorial Library</option>
+            <option value="Wissink Hall">Wissink Hall</option>
+          </select>
+          <br />
+          <h3>Delivery location</h3>
+          <input type="radio" id="room" name="location" value="room" checked />
+          <label for="room">My room or office</label>
+          <input type="radio" id="locker" name="location" value="locker" />
+          <label for="locker">Locker</label>
+          <h3>Notify me when</h3>
+          <input type="checkbox" id="notifyTransit" name="notify" value="transit" />
+          <label for="notifyTransit">Package is en route</label>
+          <input type="checkbox" id="notifyDelivered" name="notify" value="delivered" />
+          <label for="notifyDelivered">Package is delivered</label>
+          <br />
+          <button type="submit">Save Preferences</button>
+        </form>
+
+      </section>
+
+      <section id="impact">
+        <h2>Your carbon savings</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Packages Delivered</th>
+              <th>CO2 Avoided</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>12</td>
+              <td>18.4 kg</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="register">
+        <h2>Create an account</h2>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 MNSU-CampusEco. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
