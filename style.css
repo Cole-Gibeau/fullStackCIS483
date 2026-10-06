@@ -1,0 +1,17 @@
+/* Basic page background and fonts */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3eef8;
+  color: #333333;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* This is for group wide headings across our HTML docs */
+h1,
+h2,
+h3,
+h4 {
+  color: #603080;
+}
