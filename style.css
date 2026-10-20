@@ -106,3 +106,17 @@ input[type="number"]:valid {
   border: 2px solid #18733c;
   background-color: #edf9f0;
 }
+
+/* Highlight the label next to a selected checkbox or radio */
+input[type="checkbox"]:checked + label,
+input[type="radio"]:checked + label {
+  color: #603080;
+  font-weight: bold;
+}
+
+/* Make unavailable buttons look disabled */
+button:disabled,
+input[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
