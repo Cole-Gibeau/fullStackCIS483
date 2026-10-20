@@ -49,6 +49,20 @@ input[type="submit"] {
   cursor: pointer;
 }
 
+/*Button hover effect, will darken the buttons */
+button:enabled:hover,
+input[type="submit"]:enabled:hover {
+  background-color: #482460;
+}
+
+/* Outline controls when they are focused*/
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid #603080;
+  outline-offset: 2px;
+}
+
 /* CSS for all table aspects, header, data */
 table {
   width: 100%;
@@ -75,4 +89,20 @@ a {
 footer {
   text-align: center;
   margin-top: 20px;
+}
+
+/* Validation CSS */
+
+/* Invalid tracking number */
+input[name="text"]:invalid,
+input[name="number"]:invalid {
+  border: 2px solid #b42318;
+  background-color: #fff0ee;
+}
+
+/* Valid tracking number */
+input[name="text"]:valid,
+input[name="number"]:valid {
+  border: 2px solid #18733c;
+  background-color: #edf9f0;
 }
