@@ -90,3 +90,19 @@ footer {
   text-align: center;
   margin-top: 20px;
 }
+
+/* Validation CSS */
+
+/* Invalid tracking number */
+input[name="text"]:invalid,
+input[name="number"]:invalid {
+  border: 2px solid #b42318;
+  background-color: #fff0ee;
+}
+
+/* Valid tracking number */
+input[name="text"]:valid,
+input[name="number"]:valid {
+  border: 2px solid #18733c;
+  background-color: #edf9f0;
+}
