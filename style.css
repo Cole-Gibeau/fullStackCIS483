@@ -49,6 +49,12 @@ input[type="submit"] {
   cursor: pointer;
 }
 
+/*Button hover effect, will darken the buttons */
+button:enabled:hover,
+input[type="submit"]:enabled:hover {
+  background-color: #482460;
+}
+
 /* CSS for all table aspects, header, data */
 table {
   width: 100%;
