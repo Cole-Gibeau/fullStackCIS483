@@ -94,15 +94,29 @@ footer {
 /* Validation CSS */
 
 /* Invalid tracking number */
-input[name="text"]:invalid,
-input[name="number"]:invalid {
+input[type="text"]:invalid,
+input[type="number"]:invalid {
   border: 2px solid #b42318;
   background-color: #fff0ee;
 }
 
 /* Valid tracking number */
-input[name="text"]:valid,
-input[name="number"]:valid {
+input[type="text"]:valid,
+input[type="number"]:valid {
   border: 2px solid #18733c;
   background-color: #edf9f0;
+}
+
+/* Highlight the label next to a selected checkbox or radio */
+input[type="checkbox"]:checked + label,
+input[type="radio"]:checked + label {
+  color: #603080;
+  font-weight: bold;
+}
+
+/* Make unavailable buttons look disabled */
+button:disabled,
+input[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
