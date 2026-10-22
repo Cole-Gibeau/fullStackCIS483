@@ -29,6 +29,28 @@ packages.forEach(function (deliveryPackage) {
   availableOrders.appendChild(option);
 });
 
+const claimOrderButton = document.getElementById("claimOrder");
+
 availableOrders.addEventListener("change", function () {
-  console.log(availableOrders.value);
+  claimOrderButton.disabled = availableOrders.value === "";
+});
+
+const claimedOrders = document.getElementById("claimedOrders");
+
+claimOrderButton.addEventListener("click", function () {
+  const selectedPackage = packages.find(function (deliveryPackage) {
+    return deliveryPackage.trackingNumber === availableOrders.value;
+  });
+
+  if (!selectedPackage) {
+    return;
+  }
+
+  selectedPackage.status = "CLAIMED";
+
+  const selectedOption = availableOrders.selectedOptions[0];
+  claimedOrders.appendChild(selectedOption);
+
+  availableOrders.value = "";
+  claimOrderButton.disabled = true;
 });

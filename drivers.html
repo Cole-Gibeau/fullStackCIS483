@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Drivers Portal</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="drivers.js" defer></script>
   </head>
 
   <body>
@@ -15,7 +16,7 @@
         Must be logged in to view available orders, claim deliveries, and update
         transit milestones
       </h5>
-      <form action="/submit" method="post">
+      <form id="deliveryForm" action="/submit" method="post">
         <h4>Vehicle Information</h4>
         <p><strong>Driver ID: eCart-11</strong></p>
         <input type="hidden" id="cartid" name="cartid" value="eCart-11" />
@@ -28,7 +29,7 @@
           <option value="">Select an order to claim</option>
         </select>
         <br />
-        <button type="button" id="claimOrder">Claim Delivery</button>
+        <button type="button" id="claimOrder" disabled>Claim Delivery</button>
         <br />
 
         <h4>My Delivery Schedule</h4>
