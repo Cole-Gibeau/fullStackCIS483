@@ -36,7 +36,50 @@ availableOrders.addEventListener("change", function () {
   claimOrderButton.disabled = availableOrders.value === "";
 });
 
-const claimedOrders = document.getElementById("claimedOrders");
+const activeDeliveriesBody = document.getElementById("activeDeliveriesBody");
+const deliveryMessage = document.getElementById("deliveryMessage");
+
+function addDeliveryRow(deliveryPackage) {
+  const row = activeDeliveriesBody.insertRow();
+
+  row.insertCell().textContent = deliveryPackage.trackingNumber;
+  row.insertCell().textContent = deliveryPackage.destinationBuilding;
+  row.insertCell().textContent = deliveryPackage.destinationLocker;
+
+  const statusCell = row.insertCell();
+  const statusDropdown = document.createElement("select");
+
+  statusDropdown.setAttribute(
+    "aria-label",
+    "Status for " + deliveryPackage.trackingNumber,
+  );
+
+  statusDropdown.innerHTML = `
+    <option value="CLAIMED">Claimed</option>
+    <option value="LOADED">Loaded</option>
+    <option value="EN_ROUTE">En Route</option>
+    <option value="DELIVERED">Delivered</option>
+  `;
+
+  statusDropdown.value = deliveryPackage.status;
+  statusCell.appendChild(statusDropdown);
+
+  const actionCell = row.insertCell();
+  const updateButton = document.createElement("button");
+
+  updateButton.type = "button";
+  updateButton.textContent = "Update";
+  actionCell.appendChild(updateButton);
+
+  updateButton.addEventListener("click", function () {
+    deliveryPackage.status = statusDropdown.value;
+
+    const statusText = statusDropdown.selectedOptions[0].textContent;
+
+    deliveryMessage.textContent =
+      deliveryPackage.trackingNumber + " updated to " + statusText + ".";
+  });
+}
 
 claimOrderButton.addEventListener("click", function () {
   const selectedPackage = packages.find(function (deliveryPackage) {
@@ -48,30 +91,9 @@ claimOrderButton.addEventListener("click", function () {
   }
 
   selectedPackage.status = "CLAIMED";
+  addDeliveryRow(selectedPackage);
 
-  const selectedOption = availableOrders.selectedOptions[0];
-  claimedOrders.appendChild(selectedOption);
-
+  availableOrders.selectedOptions[0].remove();
   availableOrders.value = "";
   claimOrderButton.disabled = true;
-});
-
-//Update Transit Milestones Logic
-const deliveryForm = document.getElementById("deliveryForm");
-const statusSelect = document.getElementById("status");
-
-deliveryForm.addEventListener("submit", function (event) {
-  event.preventDefault();
-
-  const selectedPackage = packages.find(function (deliveryPackage) {
-    return deliveryPackage.trackingNumber === claimedOrders.value;
-  });
-
-  if (!selectedPackage) {
-    return;
-  }
-
-  selectedPackage.status = statusSelect.value;
-
-  console.log(selectedPackage);
 });
