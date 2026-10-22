@@ -1,3 +1,4 @@
+// Starting data used when no packages have been saved in this browser
 const samplePackages = [
   {
     trackingNumber: "PKG1001",
@@ -12,15 +13,16 @@ const samplePackages = [
     status: "AVAILABLE",
   },
 ];
-// Retrieve packages from localStorage or use sample packages
+// Load saved packages or use the sample data on the first visit
 const savedPackages = localStorage.getItem("campusEcoPackages");
-
 const packages = savedPackages ? JSON.parse(savedPackages) : samplePackages;
 
+// Convert the package array into JSON text and save it in the browser.
 function savePackages() {
   localStorage.setItem("campusEcoPackages", JSON.stringify(packages));
 }
 
+// Fill the Available Orders dropdown
 const availableOrders = document.getElementById("availableOrders");
 
 packages.forEach(function (deliveryPackage) {
@@ -30,6 +32,7 @@ packages.forEach(function (deliveryPackage) {
 
   const option = document.createElement("option");
 
+  // Store the tracking number as the value and show the destination details.
   option.value = deliveryPackage.trackingNumber;
   option.textContent =
     deliveryPackage.trackingNumber +
@@ -42,6 +45,8 @@ packages.forEach(function (deliveryPackage) {
 });
 
 // Claim Order Button Logic
+// Enable Claim Delivery when a package is selected.
+// Selecting the empty placeholder disables the button
 const claimOrderButton = document.getElementById("claimOrder");
 
 availableOrders.addEventListener("change", function () {
@@ -51,6 +56,7 @@ availableOrders.addEventListener("change", function () {
 const activeDeliveriesBody = document.getElementById("activeDeliveriesBody");
 const deliveryMessage = document.getElementById("deliveryMessage");
 
+// Create a table row for a newly claimed or previously saved package
 function addDeliveryRow(deliveryPackage) {
   const row = activeDeliveriesBody.insertRow();
 
@@ -58,9 +64,11 @@ function addDeliveryRow(deliveryPackage) {
   row.insertCell().textContent = deliveryPackage.destinationBuilding;
   row.insertCell().textContent = deliveryPackage.destinationLocker;
 
+  // Create a separate status dropdown for this package
   const statusCell = row.insertCell();
   const statusDropdown = document.createElement("select");
 
+  // Give screen readers a label identifying the package being updated
   statusDropdown.setAttribute(
     "aria-label",
     "Status for " + deliveryPackage.trackingNumber,
@@ -125,16 +133,20 @@ document.getElementById("cartid").value = vehicle.vehicleId;
 const reportBatteryButton = document.getElementById("reportBattery");
 const batteryMessage = document.getElementById("batteryMessage");
 
+// Record a local battery report and display confirmation.
 reportBatteryButton.addEventListener("click", function () {
   vehicle.lowBatteryReported = true;
 
   batteryMessage.textContent =
     "Low battery reported for " + vehicle.vehicleId + ".";
 
+  // Disable the button to prevent repeat reports until the page refreshes
   reportBatteryButton.textContent = "Battery Reported";
   reportBatteryButton.disabled = true;
 });
 
+// Restore saved packages to the table when the page loads
+// Currently includes all non-available packages, including delivered ones
 packages.forEach(function (deliveryPackage) {
   if (deliveryPackage.status !== "AVAILABLE") {
     addDeliveryRow(deliveryPackage);
