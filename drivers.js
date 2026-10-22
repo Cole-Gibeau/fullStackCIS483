@@ -1,4 +1,4 @@
-const packages = [
+const samplePackages = [
   {
     trackingNumber: "PKG1001",
     destinationBuilding: "CSU",
@@ -12,10 +12,22 @@ const packages = [
     status: "AVAILABLE",
   },
 ];
+// Retrieve packages from localStorage or use sample packages
+const savedPackages = localStorage.getItem("campusEcoPackages");
+
+const packages = savedPackages ? JSON.parse(savedPackages) : samplePackages;
+
+function savePackages() {
+  localStorage.setItem("campusEcoPackages", JSON.stringify(packages));
+}
 
 const availableOrders = document.getElementById("availableOrders");
 
 packages.forEach(function (deliveryPackage) {
+  if (deliveryPackage.status !== "AVAILABLE") {
+    return;
+  }
+
   const option = document.createElement("option");
 
   option.value = deliveryPackage.trackingNumber;
@@ -73,6 +85,7 @@ function addDeliveryRow(deliveryPackage) {
 
   updateButton.addEventListener("click", function () {
     deliveryPackage.status = statusDropdown.value;
+    savePackages();
 
     const statusText = statusDropdown.selectedOptions[0].textContent;
 
@@ -91,6 +104,7 @@ claimOrderButton.addEventListener("click", function () {
   }
 
   selectedPackage.status = "CLAIMED";
+  savePackages();
   addDeliveryRow(selectedPackage);
 
   availableOrders.selectedOptions[0].remove();
@@ -119,4 +133,10 @@ reportBatteryButton.addEventListener("click", function () {
 
   reportBatteryButton.textContent = "Battery Reported";
   reportBatteryButton.disabled = true;
+});
+
+packages.forEach(function (deliveryPackage) {
+  if (deliveryPackage.status !== "AVAILABLE") {
+    addDeliveryRow(deliveryPackage);
+  }
 });
