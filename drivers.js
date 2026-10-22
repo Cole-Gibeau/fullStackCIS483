@@ -29,6 +29,7 @@ packages.forEach(function (deliveryPackage) {
   availableOrders.appendChild(option);
 });
 
+// Claim Order Button Logic
 const claimOrderButton = document.getElementById("claimOrder");
 
 availableOrders.addEventListener("change", function () {
@@ -53,4 +54,24 @@ claimOrderButton.addEventListener("click", function () {
 
   availableOrders.value = "";
   claimOrderButton.disabled = true;
+});
+
+//Update Transit Milestones Logic
+const deliveryForm = document.getElementById("deliveryForm");
+const statusSelect = document.getElementById("status");
+
+deliveryForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const selectedPackage = packages.find(function (deliveryPackage) {
+    return deliveryPackage.trackingNumber === claimedOrders.value;
+  });
+
+  if (!selectedPackage) {
+    return;
+  }
+
+  selectedPackage.status = statusSelect.value;
+
+  console.log(selectedPackage);
 });
