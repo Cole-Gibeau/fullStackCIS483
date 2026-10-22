@@ -18,9 +18,12 @@
       </h5>
       <form id="deliveryForm" action="/submit" method="post">
         <h4>Vehicle Information</h4>
-        <p><strong>Driver ID: eCart-11</strong></p>
-        <input type="hidden" id="cartid" name="cartid" value="eCart-11" />
+        <p>
+          <strong>Vehicle ID: <span id="vehicleId"></span></strong>
+        </p>
+        <input type="hidden" id="cartid" name="cartid" />
         <button type="button" id="reportBattery">Report Low Battery</button>
+        <p id="batteryMessage" role="status"></p>
         <br />
 
         <h4>Available Orders Queue</h4>

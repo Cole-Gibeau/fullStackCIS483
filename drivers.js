@@ -97,3 +97,26 @@ claimOrderButton.addEventListener("click", function () {
   availableOrders.value = "";
   claimOrderButton.disabled = true;
 });
+
+// Report Low Battery Button Logic
+
+const vehicle = {
+  vehicleId: "eCart-12",
+  lowBatteryReported: false,
+};
+
+document.getElementById("vehicleId").textContent = vehicle.vehicleId;
+document.getElementById("cartid").value = vehicle.vehicleId;
+
+const reportBatteryButton = document.getElementById("reportBattery");
+const batteryMessage = document.getElementById("batteryMessage");
+
+reportBatteryButton.addEventListener("click", function () {
+  vehicle.lowBatteryReported = true;
+
+  batteryMessage.textContent =
+    "Low battery reported for " + vehicle.vehicleId + ".";
+
+  reportBatteryButton.textContent = "Battery Reported";
+  reportBatteryButton.disabled = true;
+});
