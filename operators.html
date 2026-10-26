@@ -16,7 +16,7 @@
           Input all required information into the form and submit for log
           tracking
         </h5>
-        <form action="/submit" method="post">
+        <form id ="packageForm">
           <h4>Receipt Information</h4>
           <label for="tracknum"> Tracking Number</label>
           <input
@@ -35,6 +35,7 @@
             id="weight"
             name="weight"
             min=".01"
+            max="150"
             step=".01"
             required
           />
@@ -117,14 +118,14 @@
             <br />
             Urgent - Before noon priority
           </h5>
-          <button type="submit">Submit Package Details</button>
+          <button type="submit" id="submitBtn" disabled>Submit Package Details</button>
+          <p id ="formMessage" aria-live="polite"></p>
         </form>
       </section>
       <section>
         <h2>Tracking table</h2>
-        <table>
+        <table id="trackingTable">
           <thead>
-            <tr>
               <th>Tracking Number</th>
               <th>Priority</th>
               <th>Building Information</th>
@@ -133,35 +134,15 @@
               <th>Length</th>
               <th>Width</th>
               <th>Height</th>
-            </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>PKG1001</td>
-              <td>High</td>
-              <td>CSU</td>
-              <td>L105</td>
-              <td>27 lbs</td>
-              <td>12 in.</td>
-              <td>10 in.</td>
-              <td>8 in.</td>
-            </tr>
-            <tr>
-              <td>PKG1012</td>
-              <td>Low</td>
-              <td>Memorial Library</td>
-              <td>L110</td>
-              <td>21 lbs</td>
-              <td>15 in.</td>
-              <td>12 in.</td>
-              <td>9 in.</td>
-            </tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </section>
     </main>
     <footer>
       <p>&copy; 2026 MNSU-CampusEco. All rights reserved.</p>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="operators.js"></script>
   </body>
 </html>
