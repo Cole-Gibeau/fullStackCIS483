@@ -140,6 +140,7 @@ const batteryMessage = document.getElementById("batteryMessage");
 // Record a local battery report and display confirmation.
 reportBatteryButton.addEventListener("click", function () {
   vehicle.lowBatteryReported = true;
+  localStorage.setItem("campusEcoVehicle", JSON.stringify(vehicle));
 
   batteryMessage.textContent =
     "Low battery reported for " + vehicle.vehicleId + ".";
@@ -147,6 +148,14 @@ reportBatteryButton.addEventListener("click", function () {
   // Disable the button to prevent repeat reports until the page refreshes
   reportBatteryButton.textContent = "Battery Reported";
   reportBatteryButton.disabled = true;
+  // Restore the reported state after refreshing.
+  if (vehicle.lowBatteryReported) {
+    batteryMessage.textContent =
+      "Low battery reported for " + vehicle.vehicleId + ".";
+
+    reportBatteryButton.textContent = "Battery Reported";
+    reportBatteryButton.disabled = true;
+  }
 });
 
 // Restore saved packages to the table when the page loads
