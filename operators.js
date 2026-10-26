@@ -100,3 +100,36 @@ function addPackage(pkg) {
   packages.push(pkg);
   savePackages(packages);   
 }
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function buildRow(pkg) {
+  const cells = [
+    ["Tracking Number", pkg.trackingNumber],
+    ["Priority", capitalize(pkg.priority)],
+    ["Building", pkg.building],
+    ["Locker", "L" + pkg.locker],
+    ["Weight", pkg.weight + " lbs"],
+    ["Length", pkg.length + " in."],
+    ["Width", pkg.width + " in."],
+    ["Height", pkg.height + " in."],
+  ];
+  const $row = $("<tr>").addClass("priority-" + pkg.priority);
+  cells.forEach(([label, value]) => {
+    $("<td>").attr("data-label", label).text(value).appendTo($row);
+  });
+  return $row;
+}
+
+function renderTable() {
+  const $body = $("#trackingTable tbody").empty();
+  packages.forEach(p => $body.append(buildRow(p)));
+}
+
+function showMessage(text, isError = false) {
+  $("#formMessage").stop(true, true)
+    .text(text)
+    .toggleClass("error", isError)
+    .toggleClass("success", !isError)
+    .hide().fadeIn(200);
+}
