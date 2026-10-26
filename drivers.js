@@ -122,10 +122,14 @@ claimOrderButton.addEventListener("click", function () {
 
 // Report Low Battery Button Logic
 
-const vehicle = {
-  vehicleId: "eCart-12",
-  lowBatteryReported: false,
-};
+const savedVehicle = localStorage.getItem("campusEcoVehicle");
+
+const vehicle = savedVehicle
+  ? JSON.parse(savedVehicle)
+  : {
+      vehicleId: "eCart-12",
+      lowBatteryReported: false,
+    };
 
 document.getElementById("vehicleId").textContent = vehicle.vehicleId;
 document.getElementById("cartid").value = vehicle.vehicleId;
