@@ -39,18 +39,16 @@ packages.forEach(function (deliveryPackage) {
     return;
   }
 
-  const option = document.createElement("option");
-
-  // Store the tracking number as the value and show the destination details.
-  option.value = deliveryPackage.trackingNumber;
-  option.textContent =
-    deliveryPackage.trackingNumber +
-    " - " +
-    deliveryPackage.destinationLocker +
-    " - " +
-    deliveryPackage.destinationBuilding;
-
-  availableOrders.appendChild(option);
+  $("<option>")
+    .val(deliveryPackage.trackingNumber)
+    .text(
+      deliveryPackage.trackingNumber +
+        " - " +
+        deliveryPackage.destinationLocker +
+        " - " +
+        deliveryPackage.destinationBuilding,
+    )
+    .appendTo("#availableOrders");
 });
 
 // Claim Order Button Logic
@@ -58,61 +56,63 @@ packages.forEach(function (deliveryPackage) {
 // Selecting the empty placeholder disables the button
 const claimOrderButton = document.getElementById("claimOrder");
 
-availableOrders.addEventListener("change", function () {
-  claimOrderButton.disabled = availableOrders.value === "";
+$("#availableOrders").on("change", function () {
+  $("#claimOrder").prop("disabled", $(this).val() === "");
 });
 
 const activeDeliveriesBody = document.getElementById("activeDeliveriesBody");
 const deliveryMessage = document.getElementById("deliveryMessage");
 
 // Create a table row for a newly claimed or previously saved package
+// Build a delivery row using jQuery.
 function addDeliveryRow(deliveryPackage) {
-  const row = activeDeliveriesBody.insertRow();
+  const row = $("<tr>");
 
-  row.insertCell().textContent = deliveryPackage.trackingNumber;
-  row.insertCell().textContent = deliveryPackage.destinationBuilding;
-  row.insertCell().textContent = deliveryPackage.destinationLocker;
+  $("<td>").text(deliveryPackage.trackingNumber).appendTo(row);
+  $("<td>").text(deliveryPackage.destinationBuilding).appendTo(row);
+  $("<td>").text(deliveryPackage.destinationLocker).appendTo(row);
 
-  // Create a separate status dropdown for this package
-  const statusCell = row.insertCell();
-  const statusDropdown = document.createElement("select");
-
-  // Give screen readers a label identifying the package being updated
-  statusDropdown.setAttribute(
+  const statusDropdown = $("<select>").attr(
     "aria-label",
     "Status for " + deliveryPackage.trackingNumber,
   );
 
-  statusDropdown.innerHTML = `
-    <option value="CLAIMED">Claimed</option>
-    <option value="LOADED">Loaded</option>
-    <option value="EN_ROUTE">En Route</option>
-    <option value="DELIVERED">Delivered</option>
-  `;
+  const statuses = {
+    CLAIMED: "Claimed",
+    LOADED: "Loaded",
+    EN_ROUTE: "En Route",
+    DELIVERED: "Delivered",
+  };
 
-  statusDropdown.value = deliveryPackage.status;
-  statusCell.appendChild(statusDropdown);
+  Object.entries(statuses).forEach(function ([value, label]) {
+    $("<option>").val(value).text(label).appendTo(statusDropdown);
+  });
 
-  const actionCell = row.insertCell();
-  const updateButton = document.createElement("button");
+  statusDropdown.val(deliveryPackage.status);
+  $("<td>").append(statusDropdown).appendTo(row);
 
-  updateButton.type = "button";
-  updateButton.textContent = "Update";
-  actionCell.appendChild(updateButton);
+  const updateButton = $("<button>").attr("type", "button").text("Update");
 
-  updateButton.addEventListener("click", function () {
-    deliveryPackage.status = statusDropdown.value;
+  $("<td>").append(updateButton).appendTo(row);
+
+  updateButton.on("click", function () {
+    deliveryPackage.status = statusDropdown.val();
     savePackages();
-    // Remove completed deliveries from the active table.
+
+    $("#deliveryMessage").text(
+      deliveryPackage.trackingNumber +
+        " updated to " +
+        statusDropdown.find("option:selected").text() +
+        ".",
+    );
+
+    // Hide completed deliveries while retaining their saved records.
     if (deliveryPackage.status === "DELIVERED") {
       row.remove();
     }
-
-    const statusText = statusDropdown.selectedOptions[0].textContent;
-
-    deliveryMessage.textContent =
-      deliveryPackage.trackingNumber + " updated to " + statusText + ".";
   });
+
+  $("#activeDeliveriesBody").append(row);
 }
 
 claimOrderButton.addEventListener("click", function () {
@@ -182,4 +182,15 @@ packages.forEach(function (deliveryPackage) {
   ) {
     addDeliveryRow(deliveryPackage);
   }
+});
+
+// Animate the vehicle panel opening and closing.
+$("#toggleVehicle").on("click", function () {
+  const expanded = $(this).attr("aria-expanded") === "true";
+
+  $("#vehicleDetails").stop(true, true).slideToggle(200);
+
+  $(this)
+    .attr("aria-expanded", String(!expanded))
+    .text(expanded ? "Show Vehicle Details" : "Hide Vehicle Details");
 });
