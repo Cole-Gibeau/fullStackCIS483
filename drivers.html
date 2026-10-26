@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Drivers Portal</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="drivers.js" defer></script>
   </head>
 
   <body>
@@ -15,11 +16,14 @@
         Must be logged in to view available orders, claim deliveries, and update
         transit milestones
       </h5>
-      <form action="/submit" method="post">
+      <form id="deliveryForm" action="/submit" method="post">
         <h4>Vehicle Information</h4>
-        <p><strong>Driver ID: eCart-11</strong></p>
-        <input type="hidden" id="cartid" name="cartid" value="eCart-11" />
+        <p>
+          <strong>Vehicle ID: <span id="vehicleId"></span></strong>
+        </p>
+        <input type="hidden" id="cartid" name="cartid" />
         <button type="button" id="reportBattery">Report Low Battery</button>
+        <p id="batteryMessage" role="status"></p>
         <br />
 
         <h4>Available Orders Queue</h4>
@@ -28,24 +32,26 @@
           <option value="">Select an order to claim</option>
         </select>
         <br />
-        <button type="button" id="claimOrder">Claim Delivery</button>
+        <button type="button" id="claimOrder" disabled>Claim Delivery</button>
         <br />
 
         <h4>My Delivery Schedule</h4>
-        <label for="claimedOrders">Active Deliveries</label>
-        <select id="claimedOrders" name="claimedOrders" required>
-          <option value="">Select claimed package</option>
-        </select>
-        <br />
-        <label for="status">Transit Milestone</label>
-        <select id="status" name="status" required>
-          <option value="">Select Status</option>
-          <option value="LOADED">Loaded</option>
-          <option value="EN_ROUTE">En Route</option>
-          <option value="DELIVERED">Delivered</option>
-        </select>
-        <br />
-        <input type="submit" value="Update Delivery Schedule" />
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tracking Number</th>
+              <th>Building</th>
+              <th>Locker</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="activeDeliveriesBody"></tbody>
+        </table>
+
+        <p id="deliveryMessage" role="status"></p>
       </form>
     </main>
   </body>
