@@ -133,3 +133,34 @@ function showMessage(text, isError = false) {
     .toggleClass("success", !isError)
     .hide().fadeIn(200);
 }
+
+$(function () {
+  renderTable();
+
+  const $form = $("#packageForm");
+  const syncButton = () => $("#submitBtn").prop("disabled", !$form[0].checkValidity());
+  $form.on("input change", syncButton);
+  syncButton();
+
+  $form.on("submit", function (event) {
+    event.preventDefault();
+
+    const pkg = readForm();
+    const error = validatePackage(pkg);
+    if (error) {
+      showMessage(error, true);
+      return;
+    }
+
+    addPackage(pkg);
+
+    const $row = buildRow(pkg).hide();
+    $("#trackingTable tbody").append($row);
+    $row.fadeIn(400);
+
+    showMessage(`Package ${pkg.trackingNumber} checked in with status ${pkg.status}.`);
+    this.reset();
+    syncButton();
+  });
+});
+
