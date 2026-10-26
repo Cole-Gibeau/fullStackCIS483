@@ -68,3 +68,35 @@ function seedPackages() {
 
 let packages = loadPackages() || seedPackages();
 savePackages(packages);
+
+function readForm() {
+  return new Package({
+    trackingNumber: $("#tracknum").val().trim().toUpperCase(),
+    priority: $('input[name="priority"]:checked').val(),
+    building: $("#building").val(),
+    locker: $("#locker").val(),
+    weight: parseFloat($("#weight").val()),
+    length: parseFloat($("#length").val()),
+    width: parseFloat($("#width").val()),
+    height: parseFloat($("#height").val()),
+  });
+}
+
+function validatePackage(pkg) {
+  if (!TRACKING_PATTERN.test(pkg.trackingNumber))
+    return "Tracking number must be PKG followed by 4 digits.";
+  if (packages.some(p => p.trackingNumber === pkg.trackingNumber))
+    return `${pkg.trackingNumber} has already been checked in.`;
+  if ([pkg.weight, pkg.length, pkg.width, pkg.height].some(n => isNaN(n) || n <= 0))
+    return "Weight and dimensions must be positive numbers.";
+  if (pkg.weight > MAX_WEIGHT)
+    return `Weight cannot exceed ${MAX_WEIGHT} lbs.`;
+  if (!pkg.building || !pkg.locker)
+    return "Select a building and a locker.";
+  return null;
+}
+
+function addPackage(pkg) {
+  packages.push(pkg);
+  savePackages(packages);   
+}
