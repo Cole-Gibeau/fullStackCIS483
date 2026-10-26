@@ -103,6 +103,10 @@ function addDeliveryRow(deliveryPackage) {
   updateButton.addEventListener("click", function () {
     deliveryPackage.status = statusDropdown.value;
     savePackages();
+    // Remove completed deliveries from the active table.
+    if (deliveryPackage.status === "DELIVERED") {
+      row.remove();
+    }
 
     const statusText = statusDropdown.selectedOptions[0].textContent;
 
@@ -169,16 +173,13 @@ reportBatteryButton.addEventListener("click", function () {
 });
 
 // Restore saved packages to the table when the page loads
-// Currently includes all non-available packages, including delivered ones
-// Assign packages claimed before driver assignments were introduced
-// to the driver used in our original single-driver demo.
+// Restore this driver's unfinished deliveries.
 packages.forEach(function (deliveryPackage) {
   if (
     deliveryPackage.status !== "AVAILABLE" &&
-    deliveryPackage.assignedDriver == null
+    deliveryPackage.status !== "DELIVERED" &&
+    deliveryPackage.assignedDriver === driver.driverId
   ) {
-    deliveryPackage.assignedDriver = driver.driverId;
+    addDeliveryRow(deliveryPackage);
   }
 });
-
-savePackages();
