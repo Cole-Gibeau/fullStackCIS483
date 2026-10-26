@@ -5,14 +5,23 @@ const samplePackages = [
     destinationBuilding: "CSU",
     destinationLocker: "L105",
     status: "AVAILABLE",
+    assignedDriver: null,
   },
   {
     trackingNumber: "PKG1002",
     destinationBuilding: "Preska",
     destinationLocker: "L104",
     status: "AVAILABLE",
+    assignedDriver: null,
   },
 ];
+
+// Sample driver until a login system is added.
+const driver = {
+  driverId: "DRIVER001",
+  name: "Demo Driver",
+};
+
 // Load saved packages or use the sample data on the first visit
 const savedPackages = localStorage.getItem("campusEcoPackages");
 const packages = savedPackages ? JSON.parse(savedPackages) : samplePackages;
@@ -112,6 +121,7 @@ claimOrderButton.addEventListener("click", function () {
   }
 
   selectedPackage.status = "CLAIMED";
+  selectedPackage.assignedDriver = driver.driverId;
   savePackages();
   addDeliveryRow(selectedPackage);
 
@@ -160,8 +170,15 @@ reportBatteryButton.addEventListener("click", function () {
 
 // Restore saved packages to the table when the page loads
 // Currently includes all non-available packages, including delivered ones
+// Assign packages claimed before driver assignments were introduced
+// to the driver used in our original single-driver demo.
 packages.forEach(function (deliveryPackage) {
-  if (deliveryPackage.status !== "AVAILABLE") {
-    addDeliveryRow(deliveryPackage);
+  if (
+    deliveryPackage.status !== "AVAILABLE" &&
+    deliveryPackage.assignedDriver == null
+  ) {
+    deliveryPackage.assignedDriver = driver.driverId;
   }
 });
+
+savePackages();
