@@ -15,6 +15,8 @@ class Package {
     status = "AVAILABLE",
     assignedDriver = null,
     createdAt = new Date().toISOString(),
+    signedBy = null,
+    signedAt = null,
   }) {
     this.trackingNumber = trackingNumber;
     this.priority = priority || "low";
@@ -27,6 +29,8 @@ class Package {
     this.status = status;
     this.assignedDriver = assignedDriver;
     this.createdAt = createdAt;
+    this.signedBy = signedBy;
+    this.signedAt = signedAt;
   }
 }
 
