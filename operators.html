@@ -9,7 +9,7 @@
 
   <body>
     <h1>Central Hub Operators Portal</h1>
-    <nav class = "site-nav">
+    <nav class="site-nav">
       <button onclick="window.location.href = 'index.html'">Home</button>
     </nav>
     <main>
@@ -19,7 +19,7 @@
           Input all required information into the form and submit for log
           tracking
         </h5>
-        <form id ="packageForm">
+        <form id="packageForm">
           <h4>Receipt Information</h4>
           <label for="tracknum"> Tracking Number</label>
           <input
@@ -27,6 +27,7 @@
             id="tracknum"
             name="tracknum"
             pattern="PKG[0-9]{4}"
+            placeholder="PKG1001"
             title="PKG Followed by 4 digits"
             required
           />
@@ -121,22 +122,24 @@
             <br />
             Urgent - Before noon priority
           </h5>
-          <button type="submit" id="submitBtn" disabled>Submit Package Details</button>
-          <p id ="formMessage" aria-live="polite"></p>
+          <button type="submit" id="submitBtn" disabled>
+            Submit Package Details
+          </button>
+          <p id="formMessage" aria-live="polite"></p>
         </form>
       </section>
       <section>
         <h2>Tracking table</h2>
         <table id="trackingTable">
           <thead>
-              <th>Tracking Number</th>
-              <th>Priority</th>
-              <th>Building Information</th>
-              <th>Locker Information</th>
-              <th>Weight</th>
-              <th>Length</th>
-              <th>Width</th>
-              <th>Height</th>
+            <th>Tracking Number</th>
+            <th>Priority</th>
+            <th>Building Information</th>
+            <th>Locker Information</th>
+            <th>Weight</th>
+            <th>Length</th>
+            <th>Width</th>
+            <th>Height</th>
           </thead>
           <tbody></tbody>
         </table>

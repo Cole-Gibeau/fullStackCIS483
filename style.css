@@ -156,15 +156,16 @@ footer {
 }
 /* Validation CSS */
 
-/* Invalid tracking number */
-input[type="text"]:invalid,
-input[type="number"]:invalid {
+/* Show errors after interaction or a submission attempt */
+input[type="text"]:user-invalid,
+input[type="number"]:user-invalid {
   border: 2px solid #b42318;
   background-color: #fff0ee;
 }
-/* Valid tracking number */
-input[type="text"]:valid,
-input[type="number"]:valid {
+
+/* Show success after interaction */
+input[type="text"]:user-valid,
+input[type="number"]:user-valid {
   border: 2px solid #18733c;
   background-color: #edf9f0;
 }
