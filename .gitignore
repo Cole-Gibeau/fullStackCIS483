@@ -2,3 +2,8 @@
 bin/
 obj/
 *.csproj.user
+
+node_modules/
+*.db
+.env
+.DS_Store
