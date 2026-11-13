@@ -1,3 +1,6 @@
+// Node.js Telemetry & Dispatch Server Base URL
+const NODE_API_BASE = "http://localhost:3000/api";
+
 // Starting data used when no packages have been saved in this browser
 const samplePackages = [
   {
@@ -31,6 +34,30 @@ const packages = savedPackages ? JSON.parse(savedPackages) : samplePackages;
 // Convert the package array into JSON text and save it in the browser.
 function savePackages() {
   localStorage.setItem("campusEcoPackages", JSON.stringify(packages));
+}
+
+// Helper function to send milestone status updates to the Node.js server
+function syncMilestoneWithNode(trackingNumber, status) {
+  fetch(`${NODE_API_BASE}/packages/${trackingNumber}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      status: status,
+      driverId: driver.driverId,
+      cartId: vehicle.vehicleId,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log("Node.js milestone logged:", data);
+    })
+    .catch(function (error) {
+      console.warn("Node.js server unreachable (saved locally):", error);
+    });
 }
 
 // Fill the Available Orders dropdown
@@ -101,6 +128,9 @@ function addDeliveryRow(deliveryPackage) {
     deliveryPackage.status = statusDropdown.val();
     savePackages();
 
+    // Send live milestone update to Node.js dispatch engine
+    syncMilestoneWithNode(deliveryPackage.trackingNumber, deliveryPackage.status);
+
     $("#deliveryMessage").text(
       deliveryPackage.trackingNumber +
         " updated to " +
@@ -131,6 +161,9 @@ claimOrderButton.addEventListener("click", function () {
   savePackages();
   addDeliveryRow(selectedPackage);
 
+  // Notify Node.js server that the driver claimed this delivery
+  syncMilestoneWithNode(selectedPackage.trackingNumber, "CLAIMED");
+
   availableOrders.selectedOptions[0].remove();
   availableOrders.value = "";
   claimOrderButton.disabled = true;
@@ -153,10 +186,40 @@ document.getElementById("cartid").value = vehicle.vehicleId;
 const reportBatteryButton = document.getElementById("reportBattery");
 const batteryMessage = document.getElementById("batteryMessage");
 
-// Record a local battery report and display confirmation.
+// Restore the reported state on initial page load if already reported
+if (vehicle.lowBatteryReported) {
+  batteryMessage.textContent =
+    "Low battery reported for " + vehicle.vehicleId + ".";
+  reportBatteryButton.textContent = "Battery Reported";
+  reportBatteryButton.disabled = true;
+}
+
+// Record a battery report locally and dispatch alert to Node.js server
 reportBatteryButton.addEventListener("click", function () {
   vehicle.lowBatteryReported = true;
   localStorage.setItem("campusEcoVehicle", JSON.stringify(vehicle));
+
+  // Send low-battery alert to Node.js telemetry endpoint
+  fetch(`${NODE_API_BASE}/alerts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "LOW_BATTERY",
+      cartId: vehicle.vehicleId,
+      message: `Low battery reported for ${vehicle.vehicleId} by ${driver.driverId}`,
+    }),
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log("Node.js low-battery alert logged:", data);
+    })
+    .catch(function (error) {
+      console.warn("Node.js server unreachable (saved locally):", error);
+    });
 
   batteryMessage.textContent =
     "Low battery reported for " + vehicle.vehicleId + ".";
@@ -164,14 +227,6 @@ reportBatteryButton.addEventListener("click", function () {
   // Disable the button to prevent repeat reports until the page refreshes
   reportBatteryButton.textContent = "Battery Reported";
   reportBatteryButton.disabled = true;
-  // Restore the reported state after refreshing.
-  if (vehicle.lowBatteryReported) {
-    batteryMessage.textContent =
-      "Low battery reported for " + vehicle.vehicleId + ".";
-
-    reportBatteryButton.textContent = "Battery Reported";
-    reportBatteryButton.disabled = true;
-  }
 });
 
 // Restore saved packages to the table when the page loads
@@ -196,3 +251,27 @@ $("#toggleVehicle").on("click", function () {
     .attr("aria-expanded", String(!expanded))
     .text(expanded ? "Show Vehicle Details" : "Hide Vehicle Details");
 });
+
+// Poll live cart telemetry from Node.js server 
+function pollTelemetry() {
+  fetch(`${NODE_API_BASE}/telemetry`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      const activeCart = data.carts.find(function (c) {
+        return c.cartId === vehicle.vehicleId;
+      });
+      if (activeCart) {
+        console.log(
+          `[Node Telemetry] ${activeCart.cartId} | Location: ${activeCart.location} | Battery: ${activeCart.batteryPct}%`,
+        );
+      }
+    })
+    .catch(function () {
+      // Ignore polling errors when Node.js server is offline
+    });
+}
+
+pollTelemetry();
+setInterval(pollTelemetry, 5000);
