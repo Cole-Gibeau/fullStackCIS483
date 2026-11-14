@@ -270,6 +270,71 @@ public class PackagesController : ControllerBase
         return Ok(new { trackingNumber, signedName, received = true });
     }
 
+
+    [HttpPost]
+    public async Task<IActionResult> CreatePackage(
+    [FromBody] CreatePackageRequest request,
+    [FromServices] IWebHostEnvironment environment,
+    CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment())
+            return NotFound();
+
+        const int demoOperatorId = 3;
+
+        const string packageSql = """
+        INSERT INTO Packages (
+            tracking_number, recipient_user_id, locker_id, priority,
+            weight_lbs, length_in, width_in, height_in, status
+        )
+        SELECT @trackingNumber, u.user_id, l.locker_id, @priority,
+               @weightLbs, @lengthIn, @widthIn, @heightIn, 'AVAILABLE'
+        FROM Users u
+        JOIN Lockers l ON l.locker_id = @lockerId
+        WHERE u.user_id = @recipientId AND u.role = 'END_USER';
+        """;
+
+        const string eventSql = """
+        INSERT INTO TransitEvents (package_id, changed_by_user_id, status)
+        VALUES (@packageId, @operatorId, 'AVAILABLE');
+        """;
+
+        await using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+
+        await using var packageCommand = new MySqlCommand(packageSql, connection, transaction);
+        packageCommand.Parameters.AddWithValue("@trackingNumber", request.TrackingNumber);
+        packageCommand.Parameters.AddWithValue("@recipientId", request.RecipientUserId);
+        packageCommand.Parameters.AddWithValue("@lockerId", request.LockerId);
+        packageCommand.Parameters.AddWithValue("@priority", request.Priority);
+        packageCommand.Parameters.AddWithValue("@weightLbs", request.WeightLbs);
+        packageCommand.Parameters.AddWithValue("@lengthIn", request.LengthIn);
+        packageCommand.Parameters.AddWithValue("@widthIn", request.WidthIn);
+        packageCommand.Parameters.AddWithValue("@heightIn", request.HeightIn);
+
+        try
+        {
+            if (await packageCommand.ExecuteNonQueryAsync(cancellationToken) == 0)
+                return BadRequest(new { message = "Choose a valid recipient and locker." });
+        }
+        catch (MySqlException ex) when (ex.Number == 1062) // Duplicate tracking number
+        {
+            return Conflict(new { message = "That tracking number already exists." });
+        }
+
+        await using var eventCommand = new MySqlCommand(eventSql, connection, transaction);
+        eventCommand.Parameters.AddWithValue("@packageId", packageCommand.LastInsertedId);
+        eventCommand.Parameters.AddWithValue("@operatorId", demoOperatorId);
+        await eventCommand.ExecuteNonQueryAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
+        return CreatedAtAction(
+            nameof(TrackPackage),
+            new { trackingNumber = request.TrackingNumber },
+            new { request.TrackingNumber, status = "AVAILABLE" });
+    }
 }
 
 //Records
@@ -283,3 +348,13 @@ public record PackageSummary(
 public record UpdatePackageStatusRequest(string? Status);
 public record ConfirmReceiptRequest(string? SignedName);
 public record TransitEventSummary(string Status, DateTime EventTime);
+
+public record CreatePackageRequest(
+    [property: Required, RegularExpression(@"^PKG[0-9]{4}$")] string TrackingNumber,
+    [property: Range(1, int.MaxValue)] int RecipientUserId,
+    [property: Range(1, int.MaxValue)] int LockerId,
+    [property: Required, RegularExpression("^(low|medium|high|urgent)$")] string Priority,
+    [property: Range(typeof(decimal), "0.01", "150")] decimal WeightLbs,
+    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal LengthIn,
+    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal WidthIn,
+    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal HeightIn);
