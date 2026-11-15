@@ -335,6 +335,68 @@ public class PackagesController : ControllerBase
             new { trackingNumber = request.TrackingNumber },
             new { request.TrackingNumber, status = "AVAILABLE" });
     }
+
+    [HttpGet("/api/lockers")]
+    public async Task<IActionResult> GetLockers(CancellationToken cancellationToken)
+    {
+        const string sql = """
+        SELECT l.locker_id, b.building_name, l.locker_number
+        FROM Lockers l
+        JOIN Buildings b ON b.building_id = l.building_id
+        ORDER BY b.building_name, l.locker_number;
+        """;
+
+        var lockers = new List<LockerOption>();
+
+        await using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new MySqlCommand(sql, connection);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            lockers.Add(new LockerOption(
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2)));
+        }
+
+        return Ok(lockers);
+    }
+
+    [HttpGet("/api/recipients")]
+    public async Task<IActionResult> GetRecipients(
+    [FromServices] IWebHostEnvironment environment,
+    CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment())
+            return NotFound();
+
+        const string sql = """
+        SELECT user_id, full_name
+        FROM Users
+        WHERE role = 'END_USER'
+        ORDER BY full_name, user_id;
+        """;
+
+        var recipients = new List<RecipientOption>();
+
+        await using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new MySqlCommand(sql, connection);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            recipients.Add(new RecipientOption(
+                reader.GetInt32(0),
+                reader.GetString(1)));
+        }
+
+        return Ok(recipients);
+    }
 }
 
 //Records
@@ -358,3 +420,7 @@ public record CreatePackageRequest(
     [property: Range(typeof(decimal), "0.01", "9999.99")] decimal LengthIn,
     [property: Range(typeof(decimal), "0.01", "9999.99")] decimal WidthIn,
     [property: Range(typeof(decimal), "0.01", "9999.99")] decimal HeightIn);
+
+public record LockerOption(int LockerId, string BuildingName, string LockerNumber);
+
+public record RecipientOption(int RecipientUserId, string FullName);
