@@ -21,6 +21,11 @@
         </h5>
         <form id="packageForm">
           <h4>Receipt Information</h4>
+          <label for="recipient">Recipient</label>
+          <select id="recipient" name="recipient" required>
+            <option value="">Loading recipients...</option>
+          </select>
+          <br />
           <label for="tracknum"> Tracking Number</label>
           <input
             type="text"
@@ -81,20 +86,12 @@
           <h4>Destination Information</h4>
           <label for="building">Building Information</label>
           <select id="building" name="building" required>
-            <option value="">Select Building</option>
-            <option value="CSU">CSU</option>
-            <option value="Armstrong Hall">Armstrong Hall</option>
-            <option value="Memorial Library">Memorial Library</option>
-            <option value="Wissink Hall">Wissink Hall</option>
+            <option value="">Loading buildings...</option>
           </select>
           <br />
           <label for="locker">Locker Information</label>
           <select id="locker" name="locker" required>
-            <option value="">Select Locker</option>
-            <option value="100">L100</option>
-            <option value="105">L105</option>
-            <option value="110">L110</option>
-            <option value="115">L115</option>
+            <option value="">Select a building first</option>
           </select>
           <br />
           <h4>Package Priority</h4>
