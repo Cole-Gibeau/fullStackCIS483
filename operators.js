@@ -1,6 +1,92 @@
-const STORAGE_KEY = "campusEcoPackages";
+const API_BASE = "http://localhost:5204/api";
 const TRACKING_PATTERN = /^PKG[0-9]{4}$/;
 const MAX_WEIGHT = 150;
+
+async function loadRecipients() {
+  try {
+    const response = await fetch(`${API_BASE}/recipients`);
+
+    if (!response.ok) {
+      throw new Error("Failed to load recipients.");
+    }
+
+    const recipients = await response.json();
+    const $recipient = $("#recipient");
+
+    $recipient.empty();
+    $recipient.append('<option value="">Select a recipient</option>');
+
+    recipients.forEach((recipient) => {
+      $recipient.append(
+        $("<option>")
+          .val(recipient.recipientUserId)
+          .text(recipient.fullName)
+      );
+    });
+  } catch (error) {
+    console.error(error);
+    $("#recipient").html('<option value="">Could not load recipients</option>');
+  }
+}
+
+let availableLockers = [];
+
+async function loadLockers() {
+  try {
+    const response = await fetch(`${API_BASE}/lockers`);
+
+    if (!response.ok) {
+      throw new Error("Failed to load lockers.");
+    }
+
+    availableLockers = await response.json();
+    loadBuildings();
+  } catch (error) {
+    console.error(error);
+    $("#building").html('<option value="">Could not load buildings</option>');
+    $("#locker").html('<option value="">Could not load lockers</option>');
+  }
+}
+
+function loadBuildings() {
+  const buildings = [
+    ...new Set(availableLockers.map((locker) => locker.buildingName)),
+  ];
+
+  const $building = $("#building");
+  $building.empty();
+  $building.append('<option value="">Select a building</option>');
+
+  buildings.forEach((building) => {
+    $building.append(
+      $("<option>").val(building).text(building)
+    );
+  });
+}
+
+function loadBuildingLockers(buildingName) {
+  const $locker = $("#locker");
+  $locker.empty();
+
+  if (!buildingName) {
+    $locker.append('<option value="">Select a building first</option>');
+    return;
+  }
+
+  const lockers = availableLockers.filter(
+    (locker) => locker.buildingName === buildingName
+  );
+
+  $locker.append('<option value="">Select a locker</option>');
+
+  lockers.forEach((locker) => {
+    $locker.append(
+      $("<option>")
+        .val(locker.lockerId)
+        .text(locker.lockerNumber)
+    );
+  });
+}
 
 class Package {
   constructor({
@@ -140,11 +226,6 @@ function buildRow(pkg) {
   return $row;
 }
 
-function renderTable() {
-  const $body = $("#trackingTable tbody").empty();
-  packages.forEach((p) => $body.append(buildRow(p)));
-}
-
 function showMessage(text, isError = false) {
   $("#formMessage")
     .stop(true, true)
@@ -157,6 +238,13 @@ function showMessage(text, isError = false) {
 
 $(function () {
   renderTable();
+
+  loadRecipients();
+  loadLockers();
+
+  $("#building").on("change", function () {
+    loadBuildingLockers($(this).val());
+  });
 
   const $form = $("#packageForm");
   const syncButton = () =>
