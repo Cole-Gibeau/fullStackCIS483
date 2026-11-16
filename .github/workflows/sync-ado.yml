@@ -1,0 +1,66 @@
+name: Sync ADO to GitHub
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ado-repository-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out GitHub repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Pull updates from ADO
+        shell: bash
+        env:
+          ADO_PAT: ${{ secrets.ADO_PAT }}
+        run: |
+          set -euo pipefail
+
+          # Authenticate to ADO without putting the token in the URL.
+          auth=$(printf ':%s' "$ADO_PAT" | base64 -w 0)
+          echo "::add-mask::$auth"
+
+          # Fetch ADO branches and tags into separate local refs.
+          git -c "http.https://dev.azure.com/.extraheader=AUTHORIZATION: Basic $auth" \
+            fetch --no-tags \
+            https://dev.azure.com/kq6412dt/fullStack483/_git/fullStack483 \
+            '+refs/heads/*:refs/ado/heads/*' \
+            '+refs/tags/*:refs/ado/tags/*'
+
+          # Merge ADO main while preserving this GitHub workflow.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git merge --no-edit refs/ado/heads/main
+
+          # Prepare main, the other branches, and tags for syncing.
+          refspecs=('HEAD:refs/heads/main')
+
+          while IFS= read -r ref; do
+            branch="${ref#refs/ado/heads/}"
+            if [[ "$branch" != "main" ]]; then
+              refspecs+=("$ref:refs/heads/$branch")
+            fi
+          done < <(git for-each-ref --format='%(refname)' refs/ado/heads/)
+
+          while IFS= read -r ref; do
+            tag="${ref#refs/ado/tags/}"
+            refspecs+=("$ref:refs/tags/$tag")
+          done < <(git for-each-ref --format='%(refname)' refs/ado/tags/)
+
+          # Push without force-overwriting or deleting GitHub branches.
+          git push --atomic origin "${refspecs[@]}"
