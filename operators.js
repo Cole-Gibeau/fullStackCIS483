@@ -226,6 +226,15 @@ function buildRow(pkg) {
   return $row;
 }
 
+function renderTable() {
+  const $tbody = $("#trackingTable tbody");
+  $tbody.empty();
+
+  packages.forEach((pkg) => {
+    $tbody.append(buildRow(pkg));
+  });
+}
+
 function showMessage(text, isError = false) {
   $("#formMessage")
     .stop(true, true)
