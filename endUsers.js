@@ -1,30 +1,26 @@
-// Starting data used when no packages have been saved in this browser
-const samplePackages = [
-  {
-    trackingNumber: "PKG1001",
-    destinationBuilding: "CSU",
-    destinationLocker: "L105",
-    status: "AVAILABLE",
-  },
-  {
-    trackingNumber: "PKG1002",
-    destinationBuilding: "Preska",
-    destinationLocker: "L104",
-    status: "AVAILABLE",
-  },
-];
+const API_BASE = "http://localhost:5204/api";
 
-function loadPackages() {
-  const savedPackages = localStorage.getItem("campusEcoPackages");
-  return savedPackages ? JSON.parse(savedPackages) : samplePackages;
+let packages = [];
+
+// Retrieve the current packages from the .NET API
+async function loadPackages() {
+  try {
+    const response = await fetch(`${API_BASE}/packages`);
+
+    if (!response.ok) {
+      throw new Error("Failed to load packages from the server.");
+    }
+
+    packages = await response.json();
+    renderPackagesTable();
+
+  } catch (error) {
+    console.error("Could not load packages:", error);
+    trackMessage.textContent =
+      "Unable to load package information. Please try again later.";
+  }
 }
 
-let packages = loadPackages();
-
-// Convert the package array into JSON text and save it in the browser.
-function savePackages() {
-  localStorage.setItem("campusEcoPackages", JSON.stringify(packages));
-}
 
 // Convert internal status codes into clear display text
 function getDisplayStatus(status) {
@@ -93,38 +89,61 @@ function renderPackagesTable() {
   });
 }
 
-// Track a package logic
-trackForm.addEventListener("submit", function (event) {
+
+// Track a package using the .NET API
+trackForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const enteredNumber = trackInput.value.trim().toUpperCase();
 
-  const foundPackage = packages.find(function (deliveryPackage) {
-    return deliveryPackage.trackingNumber.toUpperCase() === enteredNumber;
-  });
-
-  if (!foundPackage) {
-    trackMessage.textContent =
-      "No package found with tracking number " + enteredNumber + ".";
+  if (!enteredNumber) {
+    trackMessage.textContent = "Please enter a tracking number.";
     return;
   }
 
-  trackMessage.textContent =
-    foundPackage.trackingNumber +
-    " — " +
-    getDisplayStatus(foundPackage.status) +
-    ". Destination: " +
-    foundPackage.destinationBuilding +
-    " (" +
-    foundPackage.destinationLocker +
-    ").";
+  try {
+    const response = await fetch(
+      `${API_BASE}/packages/${encodeURIComponent(enteredNumber)}`
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Package not found."
+      );
+    }
+
+    const history = result.history || [];
+
+    const historyText = history.length
+      ? history.map(function (event) {
+          return getDisplayStatus(event.status);
+        }).join(" → ")
+      : "No transit history available.";
+
+    trackMessage.textContent =
+      result.trackingNumber +
+      " — " +
+      getDisplayStatus(result.status) +
+      ". Destination: " +
+      result.destinationBuilding +
+      " (" +
+      result.destinationLocker +
+      "). History: " +
+      historyText;
+
+  } catch (error) {
+    console.error("Tracking request failed:", error);
+    trackMessage.textContent = error.message;
+  }
 });
 
-// Sign for a delivery form
-signoffForm.addEventListener("submit", function (event) {
+
+
+// Sign for a delivery using the .NET API
+signoffForm.addEventListener("submit", async function (event) {
   event.preventDefault();
-  packages = loadPackages();
-  renderPackagesTable();
 
   const enteredNumber = signPkgInput.value.trim().toUpperCase();
   const signerName = signNameInput.value.trim();
@@ -151,31 +170,51 @@ signoffForm.addEventListener("submit", function (event) {
 
   if (foundPackage.status !== "DELIVERED") {
     signoffMessage.textContent =
-      "Cannot sign off: " +
-      foundPackage.trackingNumber +
-      " has not been marked Delivered yet (Current status: " +
-      getDisplayStatus(foundPackage.status) +
-      ").";
+      "Cannot sign off: package must be marked Delivered first. Current status: " +
+      getDisplayStatus(foundPackage.status) + ".";
     return;
   }
 
-  // Update status to complete and persist
-  // Keep the delivery status and record receipt confirmation separately.
-  foundPackage.signedBy = signerName;
-  foundPackage.signedAt = new Date().toISOString();
+  try {
+    const response = await fetch(
+      `${API_BASE}/packages/${encodeURIComponent(enteredNumber)}/confirmation`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          signedName: signerName,
+        }),
+      }
+    );
 
-  savePackages();
-  renderPackagesTable();
+    const result = await response.json();
 
-  signoffMessage.textContent =
-    "Delivery confirmed for " +
-    foundPackage.trackingNumber +
-    ". Thank you, " +
-    signerName +
-    "!";
+    if (!response.ok) {
+      throw new Error(result.message || "Delivery confirmation failed.");
+    }
 
-  signoffForm.reset();
+    foundPackage.signedBy = result.signedName;
+    foundPackage.signedAt = new Date().toISOString();
+
+    renderPackagesTable();
+
+    signoffMessage.textContent =
+      "Delivery confirmed for " +
+      enteredNumber +
+      ". Thank you, " +
+      signerName +
+      "!";
+
+    signoffForm.reset();
+
+  } catch (error) {
+    console.error("Delivery confirmation failed:", error);
+    signoffMessage.textContent = error.message;
+  }
 });
+
 
 // Delivery preferences storage logic
 const savedPreferences = localStorage.getItem("campusEcoUserPreferences");
@@ -199,8 +238,6 @@ if (savedPreferences) {
 
 preferencesForm.addEventListener("submit", function (event) {
   event.preventDefault();
-  packages = loadPackages();
-  renderPackagesTable();
 
   const selectedLocation = document.querySelector(
     'input[name="location"]:checked',
@@ -220,5 +257,5 @@ preferencesForm.addEventListener("submit", function (event) {
   preferencesMessage.textContent = "Delivery preferences successfully saved!";
 });
 
-// Initialize table on page load
-renderPackagesTable();
+// Load packages from the API when the page opens
+loadPackages();
