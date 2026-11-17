@@ -1,25 +1,7 @@
 // Node.js Telemetry & Dispatch Server Base URL
 const NODE_API_BASE = "http://localhost:3000/api";
-
-// Starting data used when no packages have been saved in this browser
-const samplePackages = [
-  {
-    trackingNumber: "PKG1001",
-    destinationBuilding: "CSU",
-    destinationLocker: "L105",
-    priority: "high",
-    status: "AVAILABLE",
-    assignedDriver: null,
-  },
-  {
-    trackingNumber: "PKG1002",
-    destinationBuilding: "Preska",
-    destinationLocker: "L104",
-    priority: "low",
-    status: "AVAILABLE",
-    assignedDriver: null,
-  },
-];
+// .NET API Base URL
+const API_BASE = "http://localhost:5204/api";
 
 // Sample driver until a login system is added.
 const driver = {
@@ -27,9 +9,8 @@ const driver = {
   name: "Demo Driver",
 };
 
-// Load saved packages or use the sample data on the first visit
-const savedPackages = localStorage.getItem("campusEcoPackages");
-const packages = savedPackages ? JSON.parse(savedPackages) : samplePackages;
+// Packages will be retrieved from the .NET API.
+let packages = [];
 
 // Convert the package array into JSON text and save it in the browser.
 function savePackages() {
@@ -60,25 +41,49 @@ function syncMilestoneWithNode(trackingNumber, status) {
     });
 }
 
-// Fill the Available Orders dropdown
+// Fill Available Orders using packages from the .NET API
 const availableOrders = document.getElementById("availableOrders");
 
-packages.forEach(function (deliveryPackage) {
-  if (deliveryPackage.status !== "AVAILABLE") {
-    return;
-  }
+async function loadPackages() {
+  try {
+    const response = await fetch(`${API_BASE}/packages`);
 
-  $("<option>")
-    .val(deliveryPackage.trackingNumber)
-    .text(
-      deliveryPackage.trackingNumber +
-        " - " +
-        deliveryPackage.destinationLocker +
-        " - " +
-        deliveryPackage.destinationBuilding,
-    )
-    .appendTo("#availableOrders");
-});
+    if (!response.ok) {
+      throw new Error("Failed to retrieve packages.");
+    }
+
+    packages = await response.json();
+
+    $("#availableOrders").empty();
+    $("#availableOrders").append(
+      '<option value="">Select an available package</option>'
+    );
+
+    packages.forEach(function (deliveryPackage) {
+      if (deliveryPackage.status !== "AVAILABLE") {
+        return;
+      }
+
+      $("<option>")
+        .val(deliveryPackage.trackingNumber)
+        .text(
+          deliveryPackage.trackingNumber +
+            " - " +
+            deliveryPackage.destinationLocker +
+            " - " +
+            deliveryPackage.destinationBuilding
+        )
+        .appendTo("#availableOrders");
+    });
+
+  } catch (error) {
+    console.error("Could not load packages:", error);
+
+    $("#availableOrders").html(
+      '<option value="">Could not load packages</option>'
+    );
+  }
+}
 
 // Claim Order Button Logic
 // Enable Claim Delivery when a package is selected.
@@ -124,30 +129,67 @@ function addDeliveryRow(deliveryPackage) {
 
   $("<td>").append(updateButton).appendTo(row);
 
-  updateButton.on("click", function () {
-    deliveryPackage.status = statusDropdown.val();
-    savePackages();
+  
+updateButton.on("click", async function () {
+  const newStatus = statusDropdown.val();
+  const previousStatus = deliveryPackage.status;
 
-    // Send live milestone update to Node.js dispatch engine
-    syncMilestoneWithNode(deliveryPackage.trackingNumber, deliveryPackage.status);
-
-    $("#deliveryMessage").text(
-      deliveryPackage.trackingNumber +
-        " updated to " +
-        statusDropdown.find("option:selected").text() +
-        ".",
+  try {
+    const response = await fetch(
+      `${API_BASE}/packages/${deliveryPackage.trackingNumber}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: newStatus,
+        }),
+      }
     );
 
-    // Hide completed deliveries while retaining their saved records.
-    if (deliveryPackage.status === "DELIVERED") {
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || "Failed to update package status."
+      );
+    }
+
+    // Update the local display after the database confirms success.
+    deliveryPackage.status = newStatus;
+
+    // Log the milestone with the Node.js dispatch server.
+    syncMilestoneWithNode(
+      deliveryPackage.trackingNumber,
+      newStatus
+    );
+
+    $("#deliveryMessage").text(
+      `${deliveryPackage.trackingNumber} updated to ${newStatus}.`
+    );
+
+    // Remove completed deliveries from the active schedule.
+    if (newStatus === "DELIVERED") {
       row.remove();
     }
-  });
+
+  } catch (error) {
+    console.error("Could not update package:", error);
+
+    // Restore the previous status if the API rejects the update.
+    statusDropdown.val(previousStatus);
+
+    $("#deliveryMessage").text(error.message);
+  }
+});
+
 
   $("#activeDeliveriesBody").append(row);
 }
 
-claimOrderButton.addEventListener("click", function () {
+
+claimOrderButton.addEventListener("click", async function () {
   const selectedPackage = packages.find(function (deliveryPackage) {
     return deliveryPackage.trackingNumber === availableOrders.value;
   });
@@ -156,18 +198,45 @@ claimOrderButton.addEventListener("click", function () {
     return;
   }
 
-  selectedPackage.status = "CLAIMED";
-  selectedPackage.assignedDriver = driver.driverId;
-  savePackages();
-  addDeliveryRow(selectedPackage);
+  try {
+    const response = await fetch(
+      `${API_BASE}/packages/${selectedPackage.trackingNumber}/claim`,
+      {
+        method: "POST",
+      }
+    );
 
-  // Notify Node.js server that the driver claimed this delivery
-  syncMilestoneWithNode(selectedPackage.trackingNumber, "CLAIMED");
+    const result = await response.json();
 
-  availableOrders.selectedOptions[0].remove();
-  availableOrders.value = "";
-  claimOrderButton.disabled = true;
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to claim package.");
+    }
+
+    // Update the local display after the database confirms the claim.
+    selectedPackage.status = "CLAIMED";
+    selectedPackage.assignedDriver = driver.driverId;
+
+    addDeliveryRow(selectedPackage);
+
+    // Log the claim with the Node.js dispatch server.
+    syncMilestoneWithNode(
+      selectedPackage.trackingNumber,
+      "CLAIMED"
+    );
+
+    $("#deliveryMessage").text(
+      `Package ${selectedPackage.trackingNumber} successfully claimed.`
+    );
+
+    // Reload available packages from the .NET API.
+    await loadPackages();
+
+  } catch (error) {
+    console.error("Could not claim package:", error);
+    $("#deliveryMessage").text(error.message);
+  }
 });
+
 
 // Report Low Battery Button Logic
 
@@ -275,3 +344,4 @@ function pollTelemetry() {
 
 pollTelemetry();
 setInterval(pollTelemetry, 5000);
+loadPackages();

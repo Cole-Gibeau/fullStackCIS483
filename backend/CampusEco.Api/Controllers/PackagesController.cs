@@ -411,15 +411,16 @@ public record UpdatePackageStatusRequest(string? Status);
 public record ConfirmReceiptRequest(string? SignedName);
 public record TransitEventSummary(string Status, DateTime EventTime);
 
+
 public record CreatePackageRequest(
-    [property: Required, RegularExpression(@"^PKG[0-9]{4}$")] string TrackingNumber,
-    [property: Range(1, int.MaxValue)] int RecipientUserId,
-    [property: Range(1, int.MaxValue)] int LockerId,
-    [property: Required, RegularExpression("^(low|medium|high|urgent)$")] string Priority,
-    [property: Range(typeof(decimal), "0.01", "150")] decimal WeightLbs,
-    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal LengthIn,
-    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal WidthIn,
-    [property: Range(typeof(decimal), "0.01", "9999.99")] decimal HeightIn);
+    [param: Required, RegularExpression(@"^PKG[0-9]{4}$")] string TrackingNumber,
+    [param: Range(1, int.MaxValue)] int RecipientUserId,
+    [param: Range(1, int.MaxValue)] int LockerId,
+    [param: Required, RegularExpression("^(low|medium|high|urgent)$")] string Priority,
+    [param: Range(typeof(decimal), "0.01", "150")] decimal WeightLbs,
+    [param: Range(typeof(decimal), "0.01", "9999.99")] decimal LengthIn,
+    [param: Range(typeof(decimal), "0.01", "9999.99")] decimal WidthIn,
+    [param: Range(typeof(decimal), "0.01", "9999.99")] decimal HeightIn);
 
 public record LockerOption(int LockerId, string BuildingName, string LockerNumber);
 
